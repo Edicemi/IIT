@@ -5,9 +5,10 @@ const CustomError = require('../lib/customError');
 const { validationResult, body } = require("express-validator");
 const { passwordHash, passwordCompare } = require('../lib/bycrypt');
 const { jwtSign } = require('../lib/ath');
+const { sendMail } = require("../../lib/mailer");
 
 exports.register = async(req, res, next) => {
-    const { fullname, email, password, role } = req.body;
+    const { fullname, email, password } = req.body;
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
@@ -26,6 +27,20 @@ exports.register = async(req, res, next) => {
                 role,
             })
             await user.save();
+
+            await ejs.renderFile(
+                path.join(__dirname, "../../public/email.ejs"),
+                {
+                  title: "Onboarding mail",
+                  body: `Welcome onboard ${fullname}, so awesome to have you here.`,
+                },
+                async (err, data) => {
+                  await sendMail(data, "Onboarding mail", email);
+                  return res.status(200).json({
+                    message: "Mail sent Successfully",
+                  });
+                }
+              );
 
             let payload = {
                 user_id: user._id,
