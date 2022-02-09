@@ -1,7 +1,14 @@
 const express = require('express');
 router = express.Router();
 const { body } = require("express-validator");
-const { register } = require("../controllers/index");
+const { 
+  register, 
+  login,
+  twitPost,
+  deletePost,
+  comment,
+  getPost
+} = require("../controllers/index");
 
 // route for authentication
 router.post('/register', body("fullname", "Name is required").trim(),
@@ -12,6 +19,10 @@ router.post('/register', body("fullname", "Name is required").trim(),
     .isAlphanumeric(),
     register);
 
-// router.post('/login', Login);
+router.post('/login', login);
+router.post('/twit', twitPost);
+router.delete('/deletePost/:user_id', deletePost);
+router.post('/comment/:id', comment);
+router.get('/fetchPost', getPost);
 
 module.exports = router;
