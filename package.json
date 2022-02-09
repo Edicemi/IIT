@@ -1,6 +1,7 @@
 {
   "name": "intelligent-innovation",
   "version": "0.0.0",
+  "author": "Taiwo Victoria",
   "private": true,
   "scripts": {
     "start": "node app.js",
