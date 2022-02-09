@@ -16,6 +16,10 @@ app.use(express.json());
 // //api routes
 app.use('/v1', userRoute);
 
+app.get("/", (req, res) => {
+  res.json({ message: "This is the main Admin application entry point" });
+});
+
 
 app.use(function (error, req, res, next) {
 
