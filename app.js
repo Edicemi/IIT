@@ -17,7 +17,7 @@ app.use(express.json());
 app.use('/v1', userRoute);
 
 app.get("/", (req, res) => {
-  res.json({ message: "This is the main Admin application entry point" });
+  res.json({ message: "This is the main Twitee application entry point" });
 });
 
 
