@@ -32,7 +32,7 @@ exports.register = async (req, res, next) => {
       });
 
       await ejs.renderFile(
-        path.join(__dirname, "../../public/email.ejs"),
+        path.join(__dirname, "../public/email.ejs"),
         {
           title: "Onboarding mail",
           body: `Welcome onboard ${fullname}, so awesome to have you here.`,
