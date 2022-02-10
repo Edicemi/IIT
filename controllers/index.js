@@ -34,11 +34,11 @@ exports.register = async (req, res, next) => {
       await ejs.renderFile(
         path.join(__dirname, "../public/email.ejs"),
         {
-          title: "Onboarding mail",
+          title: "Onboarding Mail",
           body: `Welcome onboard ${fullname}, so awesome to have you here.`,
         },
         async (err, data) => {
-          await sendMail(data, "Onboarding mail", email);
+          await sendMail(data, "Twitee Onboarding mail", email);
         }
       );
 
