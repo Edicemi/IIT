@@ -104,6 +104,7 @@ exports.forgetPassword = async (req, res) => {
       };
     const token = randtoken.generate(20);
     await user.save({ validateBefore: false });
+
     await ejs.renderFile(
       path.join(__dirname, '../publc/email.ejs'),
       {
@@ -116,11 +117,43 @@ exports.forgetPassword = async (req, res) => {
           message: "Reset password sent please click to link",
           data: token,
         });
+      }
+    );
 
   } catch (error) {
     next(error);
   }
 };
+
+  
+exports.resetPassword = async (req, res) => {
+    const { token, password, confirmPassword } = req.body;
+    try {
+      if (!password && !confirmPassword) {
+        throw CustomError('please enter your password', '', 401);
+      }
+      if (password !== confirmPassword) {
+        throw CustomError('password dont match', '', 401);
+      }
+
+      const user = await User.findOne({
+        resetToken: token
+      });
+      if (!user) throw CustomError("Password reset token is invalid or has expired.", '', 401);
+
+      console.log(user)
+      const hashedPassword = await passwordHash(password);
+      user.password = hashedPassword
+      await user.save();
+    return res.status(200).json({
+      message: "Reset successfully",
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 
   
 exports.twitPost = async (req, res, next) => {
