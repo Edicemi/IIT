@@ -1,5 +1,6 @@
 const ejs = require("ejs");
 const path = require("path");
+const randtoken = require("rand-token");
 const User = require("../models/user");
 const Comment = require("../models/comment");
 const Twitter = require("../models/twit");
@@ -90,6 +91,38 @@ exports.login = async (req, res) => {
   }
 };
 
+
+exports.forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email: email });
+    console.log(email);
+    if (!user)
+      throw {
+        message: "User not found",
+        code: 400,
+      };
+    const token = randtoken.generate(20);
+    await user.save({ validateBefore: false });
+    await ejs.renderFile(
+      path.join(__dirname, '../publc/email.ejs'),
+      {
+        title: `Password Reset Token, copy and paste to reset your password ${token}`,
+        body: 'Password Reset Token, copy and paste to reset your password',
+      },
+      async (err, data) => {
+        await sendMail(data, 'Reset your password', email);
+        return res.status(200).json({
+          message: "Reset password sent please click to link",
+          data: token,
+        });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+  
 exports.twitPost = async (req, res, next) => {
   try {
     const { tweet } = req.body;
