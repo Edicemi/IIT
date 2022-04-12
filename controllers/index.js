@@ -103,9 +103,13 @@ exports.forgetPassword = async (req, res, next) => {
         message: "User not found",
         code: 400,
       };
-    const token = randtoken.generate(20);
+  
+    const token = new Token({
+      token: randtoken.generate(20),
+      userId: user._id,
+    });
     
-    await user.save({ validateBefore: false });
+    await token.save();
 
     await ejs.renderFile(
       path.join(__dirname, '../public/email.ejs'),
@@ -116,8 +120,8 @@ exports.forgetPassword = async (req, res, next) => {
       async (err, data) => {
         await sendMail(data, 'Reset your password', email);
         return res.status(200).json({
-          message: "Reset password sent please click to link",
-          data: token,
+          message: "Reset password sent succesfully",
+          data: token.token,
         });
       }
     );
@@ -129,7 +133,7 @@ exports.forgetPassword = async (req, res, next) => {
 
   
 exports.resetPassword = async (req, res, next) => {
-    const { token, password, confirmPassword } = req.body;
+    const { tokenId, password, confirmPassword } = req.body;
     try {
       if (!password && !confirmPassword) {
         throw new CustomError('please enter your password', '', 401);
@@ -138,12 +142,13 @@ exports.resetPassword = async (req, res, next) => {
         throw new CustomError('password do not match', '', 401);
       }
 
-      const user = await User.findOne({
-        _id: token.userId
-      });
-      if (!user) throw new CustomError("Password reset token is invalid or has expired.", '', 401);
+      const token = await Token.findOne({ token: tokenId });
+      if (!token) {
+        throw new CustomError("Password reset token is invalid or has expired.", '', 401);
+      }
+      const user = await User.findOne({ _id: token.userId });
 
-      console.log(user)
+      // console.log(user)
       const hashedPassword = await passwordHash(password);
       user.password = hashedPassword
       await user.save();
