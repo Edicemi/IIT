@@ -2,6 +2,7 @@ const ejs = require("ejs");
 const path = require("path");
 const randtoken = require("rand-token");
 const User = require("../models/user");
+const Token = require("../models/token");
 const Comment = require("../models/comment");
 const Twitter = require("../models/twit");
 const CustomError = require("../lib/customError");
@@ -92,7 +93,7 @@ exports.login = async (req, res) => {
 };
 
 
-exports.forgetPassword = async (req, res) => {
+exports.forgetPassword = async (req, res, next) => {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email: email });
@@ -103,14 +104,15 @@ exports.forgetPassword = async (req, res) => {
         code: 400,
       };
     const token = randtoken.generate(20);
+    
     await user.save({ validateBefore: false });
 
     await ejs.renderFile(
-      path.join(__dirname, '../publc/email.ejs'),
+      path.join(__dirname, '../public/email.ejs'),
       {
         title: `Password Reset Token, copy and paste to reset your password ${token}`,
         body: 'Password Reset Token, copy and paste to reset your password',
-      },
+      },  
       async (err, data) => {
         await sendMail(data, 'Reset your password', email);
         return res.status(200).json({
@@ -126,20 +128,20 @@ exports.forgetPassword = async (req, res) => {
 };
 
   
-exports.resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res, next) => {
     const { token, password, confirmPassword } = req.body;
     try {
       if (!password && !confirmPassword) {
-        throw CustomError('please enter your password', '', 401);
+        throw new CustomError('please enter your password', '', 401);
       }
       if (password !== confirmPassword) {
-        throw CustomError('password dont match', '', 401);
+        throw new CustomError('password do not match', '', 401);
       }
 
       const user = await User.findOne({
-        resetToken: token
+        _id: token.userId
       });
-      if (!user) throw CustomError("Password reset token is invalid or has expired.", '', 401);
+      if (!user) throw new CustomError("Password reset token is invalid or has expired.", '', 401);
 
       console.log(user)
       const hashedPassword = await passwordHash(password);

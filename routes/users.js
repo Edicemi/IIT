@@ -8,7 +8,8 @@ const {
   deletePost,
   comment,
   getPost,
-  forgetPassword
+  forgetPassword,
+  resetPassword
 } = require("../controllers/index");
 
 const { validateUserToken } = require("../lib/ath");
@@ -31,5 +32,6 @@ router.delete("/deletePost/:twitId", validateUserToken, deletePost);
 router.post("/comment/:postId", validateUserToken, comment);
 router.get("/fetchPost", validateUserToken, getPost);
 router.post("/forgetPassword", forgetPassword);
+router.post("/resetPassword", resetPassword);
 
 module.exports = router;
